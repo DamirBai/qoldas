@@ -1,0 +1,30 @@
+[
+  {
+    "key": "family",
+    "icon": "👨‍👩‍👧",
+    "label_ru": "Семья",
+    "label_en": "Family",
+    "label_kk": "Отбасы"
+  },
+  {
+    "key": "food_drinks",
+    "icon": "🍔",
+    "label_ru": "Еда и напитки",
+    "label_en": "Food & Drinks",
+    "label_kk": "Тағам және сусындар"
+  },
+  {
+    "key": "health",
+    "icon": "🩺",
+    "label_ru": "Здоровье",
+    "label_en": "Health",
+    "label_kk": "Денсаулық"
+  },
+  {
+    "key": "transport",
+    "icon": "🚗",
+    "label_ru": "Транспорт",
+    "label_en": "Transport",
+    "label_kk": "Көлік"
+  }
+]

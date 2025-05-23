@@ -1,0 +1,102 @@
+[
+  {
+    "courseId": 1,
+    "topic": "family",
+    "level": "beginner",
+    "stages": [
+      {
+        "stageTitle_ru": "Этап 1: Знакомство",
+        "stageTitle_en": "Stage 1: Introduction",
+        "stageTitle_kk": "1-кезең: Танысу",
+        "modules": [
+          {
+            "moduleTitle_ru": "Основы приветствия",
+            "moduleTitle_en": "Greetings Basics",
+            "moduleTitle_kk": "Сәлемдесу негіздері",
+            "steps": [
+              {
+                "type": "video",
+                "video": "",
+                "description_ru": "Как сказать \"Привет\"?",
+                "description_en": "How to say \"Hello\"?",
+                "description_kk": "\"Сәлем\" қалай айтылады?"
+              },
+              {
+                "type": "question",
+                "video": "",
+                "question_ru": "Что означает этот жест?",
+                "question_en": "What does this gesture mean?",
+                "question_kk": "Бұл қимыл нені білдіреді?",
+                "options_ru": ["Привет", "Пока", "Спасибо"],
+                "options_en": ["Hello", "Bye", "Thanks"],
+                "options_kk": ["Сәлем", "Сау бол", "Рақмет"],
+                "answer": "Привет"
+              },
+              {
+                "type": "video",
+                "video": "",
+                "description_ru": "Как представиться?",
+                "description_en": "How to introduce yourself?",
+                "description_kk": "Өзіңізді қалай таныстырасыз?"
+              },
+              {
+                "type": "question",
+                "video": "",
+                "question_ru": "Как вы представитесь?",
+                "question_en": "How do you introduce yourself?",
+                "question_kk": "Қалай таныстырасыз?",
+                "options_ru": ["Я Иван", "До свидания", "Ты кто?"],
+                "options_en": ["I am Ivan", "Goodbye", "Who are you?"],
+                "options_kk": ["Мен Иванмын", "Сау бол", "Сен кімсің?"],
+                "answer": "Я Иван"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stageTitle_ru": "Этап 2: Эмоции",
+        "stageTitle_en": "Stage 2: Emotions",
+        "stageTitle_kk": "2-кезең: Эмоциялар",
+        "modules": [
+          {
+            "moduleTitle_ru": "Жесты эмоций",
+            "moduleTitle_en": "Emotion Gestures",
+            "moduleTitle_kk": "Эмоция қимылдары",
+            "steps": [
+              {
+                "type": "video",
+                "video": "",
+                "description_ru": "Как показать радость?",
+                "description_en": "How to show joy?",
+                "description_kk": "Қуанышты қалай көрсетеміз?"
+              },
+              {
+                "type": "question",
+                "video": "",
+                "question_ru": "Какой жест выражает радость?",
+                "question_en": "Which gesture expresses joy?",
+                "question_kk": "Қай қимыл қуанышты білдіреді?",
+                "options_ru": ["улыбка", "слёзы", "грусть"],
+                "options_en": ["smile", "tears", "sadness"],
+                "options_kk": ["жымию", "көз жасы", "қайғы"],
+                "answer": "улыбка"
+              },
+              {
+                "type": "question",
+                "video": "",
+                "question_ru": "Как показать, что тебе грустно?",
+                "question_en": "How to show you're sad?",
+                "question_kk": "Мұңайғаныңды қалай көрсетесің?",
+                "options_ru": ["улыбка", "слёзы", "смех"],
+                "options_en": ["smile", "tears", "laughter"],
+                "options_kk": ["жымию", "көз жасы", "күлу"],
+                "answer": "слёзы"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

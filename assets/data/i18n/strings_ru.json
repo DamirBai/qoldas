@@ -1,0 +1,73 @@
+{
+    "settings": "Настройки",
+    "save": "Сохранить",
+    "avatar_and_name": "Аватар и имя",
+    "username": "Имя пользователя",
+    "change_password_email": "Изменить пароль / почту",
+    "feature_in_progress": "Функция в разработке",
+    "language": "Язык приложения",
+    "theme": "Тема оформления",
+    "dark_theme": "Тёмная тема",
+
+    "modules": "Секции",
+    "module": "Секция",
+    "module_completed": "Секция завершена!",
+
+    "wrong_answer": "Неправильный ответ. Попробуй ещё раз.",
+    "next": "Далее",
+    "next_step": "Следующий шаг",
+    "next_question": "Следующий вопрос",
+    "finish_test": "Завершить тест",
+    "results": "Результаты",
+    "you_answered": "Вы ответили правильно на",
+    "of": "из",
+    "retry": "Пройти снова",
+
+    "back_to_course": "Назад к курсу",
+    "no_steps": "Нет шагов",
+    "profile": "Профиль",
+    "lessons_completed": "Пройдено уроков",
+    "tests_completed": "Пройдено тестов",
+    "total_study_time": "Общее время обучения",
+
+    "home": "Главная",
+    "courses": "Курсы",
+    "plans": "Планы",
+    "select_level": "Выбор уровня",
+    "beginner": "Начальный",
+    "intermediate": "Базовый",
+    "advanced": "Продвинутый",
+    "search": "Поиск",
+    "filter": "Фильтр",
+
+    "select_plan": "Выберите план",
+
+    "plan_free_title": "Бесплатный план",
+    "plan_free_subtitle": "Для людей с ограниченными возможностями",
+    "plan_free_description": "Предоставляется при подтверждении документов.",
+    "plan_free_price": "Бесплатно",
+
+    "plan_premium_title": "Без рекламы",
+    "plan_premium_subtitle": "Удаление всей рекламы из приложения",
+    "plan_premium_description": "Единовременная оплата без подписки.",
+    "plan_premium_price": "₸1190",
+    "proceed_to_payment": "Перейти к оплате",
+    "payment_not_implemented": "Функция оплаты пока не реализована.",
+
+    "learning_topics": "Темы обучения",
+    "no_topics_available": "Нет доступных тем",
+
+    "all_courses": "Все курсы",
+    "search_course": "Поиск курса...",
+    "no_courses_found": "Курсы не найдены",
+
+    "all_topics": "Все темы",
+    "all_levels": "Все уровни",
+    "email": "Электронная почта",
+    "password": "Пароль",
+    "invalid_email": "Введите корректный email",
+    "invalid_password": "Пароль должен быть не менее 6 символов",
+    "saved_successfully": "Изменения сохранены"
+
+  }
+  

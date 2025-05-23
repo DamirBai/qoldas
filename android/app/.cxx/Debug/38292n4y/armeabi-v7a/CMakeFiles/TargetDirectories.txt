@@ -1,0 +1,2 @@
+C:/Users/damirby/Desktop/projects/qoldas/qoldas/android/app/.cxx/Debug/38292n4y/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/damirby/Desktop/projects/qoldas/qoldas/android/app/.cxx/Debug/38292n4y/armeabi-v7a/CMakeFiles/rebuild_cache.dir

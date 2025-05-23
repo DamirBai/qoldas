@@ -1,0 +1,2 @@
+C:/Users/Aset/Desktop/qoldas-main/android/app/.cxx/RelWithDebInfo/6g2e295p/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Aset/Desktop/qoldas-main/android/app/.cxx/RelWithDebInfo/6g2e295p/armeabi-v7a/CMakeFiles/rebuild_cache.dir

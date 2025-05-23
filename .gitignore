@@ -1,0 +1,112 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android related
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/key.properties
+android/app/*.keystore
+android/app/*.jks
+
+# iOS related
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Runner.xcworkspace/
+ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS related
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/ephemeral/
+macos/Pods/
+macos/.symlinks/
+macos/Flutter/Flutter.podspec
+macos/Flutter/flutter_export_environment.sh
+
+# Web related
+web/.dart_tool/
+web/.packages
+web/build/
+
+# Windows related
+windows/Flutter/ephemeral/
+windows/Runner/GeneratedPluginRegistrant.*
+
+# Linux related
+linux/Flutter/ephemeral/
+linux/Runner/GeneratedPluginRegistrant.*
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+*.apk
+*.ipa
+*.g.dart
+*.lock
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.rej
+*.swo
+*.swn
+*.swp
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Environment files
+.env
+.env.*
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Firebase
+firebase-debug.log
+firebase-debug.*
+firebase.json
+
+# Coverage
+coverage/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/readme.md
+
+# Generated files
+doc/api/

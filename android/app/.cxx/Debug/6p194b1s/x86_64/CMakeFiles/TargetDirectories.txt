@@ -1,0 +1,2 @@
+C:/Users/Aset/Desktop/qoldas-main/android/app/.cxx/Debug/6p194b1s/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/Aset/Desktop/qoldas-main/android/app/.cxx/Debug/6p194b1s/x86_64/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,20 @@
+[
+  {
+    "key": "beginner",
+    "label_ru": "Начинающий",
+    "label_en": "Beginner",
+    "label_kk": "Бастапқы"
+  },
+  {
+    "key": "intermediate",
+    "label_ru": "Средний",
+    "label_en": "Intermediate",
+    "label_kk": "Орта"
+  },
+  {
+    "key": "advanced",
+    "label_ru": "Продвинутый",
+    "label_en": "Advanced",
+    "label_kk": "Жетілдірілген"
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "397493191030",
+    "project_id": "qoldas-7c44b",
+    "storage_bucket": "qoldas-7c44b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:397493191030:android:756ebd60de94a56c23ba57",
+        "android_client_info": {
+          "package_name": "com.drxkxn.qoldas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "397493191030-geujad731gpq5h4c6iurnnj93bbtokcs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.drxkxn.qoldas",
+            "certificate_hash": "08b1c8b546ff937cf082374d6366c0261a10b603"
+          }
+        },
+        {
+          "client_id": "397493191030-rp93pdasmf2d2pel1cqak1vvg9dbfovq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1rMRlnn-toQPaqDfQTkdP8ywD_bQYUb8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "397493191030-rp93pdasmf2d2pel1cqak1vvg9dbfovq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "397493191030-2o6hnkbakuabvu9fs9r1r5lsbo1grd2p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.drxkxn.qoldas"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

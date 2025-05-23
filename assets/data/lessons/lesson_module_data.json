@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "topic": "family",
+    "level": "beginner",
+    "stages": [
+      {
+        "stageTitle": "Базовые жесты",
+        "modules": [
+          {
+            "moduleTitle": "Приветствия",
+            "steps": [
+              {
+                "type": "video",
+                "video": "assets/videos/hello.mp4",
+                "description": "Жест приветствия"
+              },
+              {
+                "type": "video",
+                "video": "assets/videos/bye.mp4",
+                "description": "Жест прощания"
+              },
+              {
+                "type": "video",
+                "video": "assets/lessons/topics/family/мама.gif",
+                "description": "Жест благодарности"
+              },
+              {
+                "type": "question",
+                "video": "assets/gifs/thanks.gif",
+                "question": "Что означает этот жест?",
+                "options": ["Привет", "Пока", "Спасибо"],
+                "answer": "Спасибо"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

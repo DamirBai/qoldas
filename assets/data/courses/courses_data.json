@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Приветствие и знакомства",
+    "description": "Научитесь здороваться и представляться на жестовом языке.",
+    "image": "",
+    "topic": "family",
+    "level": "beginner"
+  },
+  {
+    "id": 2,
+    "title": "Семейные связи",
+    "description": "Мама, папа, брат, сестра — важные слова в общении.",
+    "image": "",
+    "topic": "family",
+    "level": "intermediate"
+  },
+  {
+    "id": 3,
+    "title": "Питание вне дома",
+    "description": "Жесты, связанные с кафе, меню и заказами.",
+    "image": "",
+    "topic": "food_drinks",
+    "level": "advanced"
+  }
+]
