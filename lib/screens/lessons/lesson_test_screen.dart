@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:video_player/video_player.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../services/translation_service.dart';
 import '../../services/lesson_progress_service.dart';
-import 'package:flutter/services.dart'; 
-import 'dart:math';
+import 'package:flutter/services.dart';
+import '../../widgets/lesson_video_player.dart';
 
 class LessonTestScreen extends StatefulWidget {
   final String courseId;
@@ -30,23 +29,19 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
   List<QueryDocumentSnapshot> questions = [];
   List<QueryDocumentSnapshot> incorrect = [];
   Map<String, int> selectedAnswers = {};
-  Map<String, VideoPlayerController> _videoControllers = {};
   bool isLoading = true;
   int currentIndex = 0;
   Set<String> retried = {};
+  bool answered = false;
+  int? selectedOption;
+
+  final AudioPlayer player = AudioPlayer();
+  String emoji = '';
 
   @override
   void initState() {
     super.initState();
     _loadQuestions();
-  }
-
-  @override
-  void dispose() {
-    for (var c in _videoControllers.values) {
-      c.dispose();
-    }
-    super.dispose();
   }
 
   Future<void> _loadQuestions() async {
@@ -76,21 +71,7 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
         .collection('question')
         .get();
 
-    final docs = qSnap.docs;
-    docs.shuffle(Random());
-
-    for (var q in docs) {
-      final url = q['questionUrl'];
-      if (url != null && url.toString().endsWith('.mp4')) {
-        final controller = VideoPlayerController.networkUrl(Uri.parse(url));
-        await controller.setLooping(true);
-        await controller.setVolume(0);
-        await controller.initialize();
-        await controller.play();
-        _videoControllers[q.id] = controller;
-      }
-    }
-
+    final docs = qSnap.docs..shuffle();
     setState(() {
       allQuestions = docs;
       questions = List.from(docs);
@@ -99,11 +80,17 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
   }
 
   void _submit(int selected) {
+    if (answered) return;
+
     final currentQ = questions[currentIndex];
     final correct = currentQ['rightAnswerIndex'];
     final isCorrect = selected == correct;
 
-    selectedAnswers[currentQ.id] = selected;
+    setState(() {
+      selectedAnswers[currentQ.id] = selected;
+      selectedOption = selected;
+      answered = true;
+    });
 
     if (!isCorrect && !retried.contains(currentQ.id)) {
       HapticFeedback.heavyImpact();
@@ -111,20 +98,28 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
       retried.add(currentQ.id);
     }
 
-    if (currentIndex + 1 < questions.length) {
-      setState(() => currentIndex++);
-    } else if (incorrect.isNotEmpty) {
-      setState(() {
-        questions = [...incorrect];
-        incorrect.clear();
-        currentIndex = 0;
-      });
-    } else {
-      _finish();
-    }
+    Future.delayed(const Duration(seconds: 1), () {
+      if (currentIndex + 1 < questions.length) {
+        setState(() {
+          currentIndex++;
+          answered = false;
+          selectedOption = null;
+        });
+      } else if (incorrect.isNotEmpty) {
+        setState(() {
+          questions = [...incorrect];
+          incorrect.clear();
+          currentIndex = 0;
+          answered = false;
+          selectedOption = null;
+        });
+      } else {
+        _finish();
+      }
+    });
   }
 
-   Future<void> _finish() async {
+  Future<void> _finish() async {
     int correctCount = selectedAnswers.entries.where((e) {
       final q = allQuestions.firstWhere((q) => q.id == e.key);
       return e.value == q['rightAnswerIndex'];
@@ -154,9 +149,6 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
       percent: percent,
     );
 
-    String emoji;
-    final player = AudioPlayer();
-
     if (percent >= 70) {
       emoji = '🎉';
       player.play(AssetSource('sounds/success.mp3'));
@@ -168,40 +160,62 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
       player.play(AssetSource('sounds/fail.mp3'));
     }
 
-    showDialog(
+    await showGeneralDialog(
       context: context,
-      barrierDismissible: false, 
-      builder: (_) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 48)),
-            const SizedBox(height: 12),
-            Text(
-              '${TranslationService.t('correct')}: $correctCount / ${allQuestions.length}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${TranslationService.t('percent')}: $percent%',
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w500,
+      barrierDismissible: false,
+      barrierLabel: 'Result',
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
+      transitionBuilder: (context, anim1, anim2, child) {
+        return Transform.scale(
+          scale: Curves.easeOut.transform(anim1.value),
+          child: Opacity(
+            opacity: anim1.value,
+            child: AlertDialog(
+              backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.95),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(emoji, style: const TextStyle(fontSize: 48)),
+                  const SizedBox(height: 12),
+                  Text(
+                    '${TranslationService.t('correct')}: $correctCount / ${allQuestions.length}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${TranslationService.t('percent')}: $percent%',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Future.delayed(const Duration(milliseconds: 150), () {
+                      Navigator.of(context).pop();
+                    });
+                  },
+                  child: Text(TranslationService.t('ok')),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: Text(TranslationService.t('ok')),
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  Widget _buildQuestionWithKey() {
+    return KeyedSubtree(
+      key: ValueKey(currentIndex),
+      child: _buildQuestion(),
     );
   }
 
@@ -221,11 +235,14 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: Center(
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                width: MediaQuery.of(context).size.height * 0.4 * (9 / 16),
+                height: MediaQuery.of(context).size.height * 0.35,
+                width: MediaQuery.of(context).size.height * 0.35 * (9 / 16),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: VideoPlayer(_videoControllers[q.id]!),
+                  child: LessonVideoPlayer(
+                    key: ValueKey(videoUrl),
+                    videoUrl: videoUrl,
+                  ),
                 ),
               ),
             ),
@@ -233,10 +250,27 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
         Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         ...List.generate(answers.length, (i) {
+          final isCorrect = i == q['rightAnswerIndex'];
+          final isSelected = selectedOption == i;
+
+          Color? color;
+          if (answered && isSelected) {
+            color = isCorrect ? Colors.green : Colors.red;
+          } else if (answered && isCorrect) {
+            color = Colors.green;
+          }
+
           return Card(
+            color: color,
             child: ListTile(
-              title: Text(answers[i]),
-              onTap: () => _submit(i),
+              title: Text(
+                answers[i],
+                style: TextStyle(
+                  color: color != null ? Colors.white : null,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: answered ? null : () => _submit(i),
             ),
           );
         }),
@@ -259,7 +293,14 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
           color: Theme.of(context).colorScheme.primary,
         ),
       ),
-      body: _buildQuestion(),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+        child: _buildQuestionWithKey(),
+      ),
     );
   }
 }

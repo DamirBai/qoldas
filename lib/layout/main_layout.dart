@@ -54,8 +54,9 @@ class _MainLayoutState extends State<MainLayout> {
       body: screens[_currentIndex],
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          splashColor:
-              isDark ? const Color(0xFF6F7BD9).withOpacity(0.2) : const Color(0xFFB0C7FF).withOpacity(0.2),
+          splashColor: isDark
+              ? const Color(0xFF6F7BD9).withOpacity(0.2)
+              : const Color(0xFFB0C7FF).withOpacity(0.2),
           highlightColor: Colors.transparent,
           hoverColor: Colors.transparent,
         ),
@@ -64,8 +65,8 @@ class _MainLayoutState extends State<MainLayout> {
           onTap: (i) => setState(() => _currentIndex = i),
           type: BottomNavigationBarType.fixed,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          selectedFontSize: 11,
-          unselectedFontSize: 11,
+          selectedFontSize: 13,
+          unselectedFontSize: 12,
           showUnselectedLabels: true,
           selectedItemColor:
               isDark ? const Color(0xFFB4BBFF) : const Color(0xFF3F51B5),
@@ -74,23 +75,23 @@ class _MainLayoutState extends State<MainLayout> {
           elevation: 12,
           items: [
             BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined, size: 22),
-              activeIcon: const Icon(Icons.home, size: 22),
+              icon: const Icon(Icons.home_outlined, size: 24),
+              activeIcon: const Icon(Icons.home, size: 26),
               label: TranslationService.t('home'),
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.school_outlined, size: 22),
-              activeIcon: const Icon(Icons.school, size: 22),
+              icon: const Icon(Icons.school_outlined, size: 24),
+              activeIcon: const Icon(Icons.school, size: 26),
               label: TranslationService.t('courses'),
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.star_outline, size: 22),
-              activeIcon: const Icon(Icons.star, size: 22),
+              icon: const Icon(Icons.star_outline, size: 24),
+              activeIcon: const Icon(Icons.star, size: 26),
               label: TranslationService.t('plans'),
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline, size: 22),
-              activeIcon: const Icon(Icons.person, size: 22),
+              icon: const Icon(Icons.person_outline, size: 24),
+              activeIcon: const Icon(Icons.person, size: 26),
               label: TranslationService.t('profile'),
             ),
           ],
