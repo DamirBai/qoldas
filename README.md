@@ -94,7 +94,7 @@ flutter run
 ## 👨‍💻 Авторы
 - Студенты группы Software Engineering — 2210, Astana IT University:
   - Kuanyshbayev Aset
-  - Lesbek Nurbaky
+  - Lesbek Nurbakyt
   - Baigenzhin Damir
 - Поддержка мастеров жестового языка
 
