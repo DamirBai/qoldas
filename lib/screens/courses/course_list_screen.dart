@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import '../../models/course_model.dart';
 import '../../services/firebase_services/firebase_course_service.dart';
 import '../../widgets/course_card.dart';
@@ -27,35 +29,90 @@ class _CourseListScreenState extends State<CourseListScreen> {
   String topicTitle = '';
   bool isLoading = true;
 
+  late Box<Course> _coursesBox;
+
   @override
   void initState() {
     super.initState();
-    _loadCoursesAndTopic();
+    _initAndLoadData();
   }
 
-  Future<void> _loadCoursesAndTopic() async {
-    try {
-      final lang = TranslationService.currentLang;
+  Future<void> _initAndLoadData() async {
+    _coursesBox = await Hive.openBox<Course>('coursesBox');
 
+    // Загрузить локализованный заголовок темы из локального или сетевого источника
+    final lang = TranslationService.currentLang;
+    final cachedCourses = _coursesBox.values
+        .where((c) => c.topicId == widget.topicId && c.levelId == widget.levelId)
+        .toList();
+
+    // Показываем курсы из кэша
+    setState(() {
+      courses = cachedCourses;
+      isLoading = false;
+    });
+
+    // Загружаем заголовок темы (можно кэшировать отдельно, если нужно)
+    final localizedTitle = await FirebaseCourseService.getLocalizedTopicTitle(widget.topicId, lang);
+    setState(() {
+      topicTitle = localizedTitle;
+    });
+
+    // Фоновая синхронизация курсов из Firestore
+    await _syncCoursesWithFirestore();
+
+    // После синхронизации обновляем курсы в UI
+    final updatedCourses = _coursesBox.values
+        .where((c) => c.topicId == widget.topicId && c.levelId == widget.levelId)
+        .toList();
+
+    if (!listEquals(courses, updatedCourses)) {
+      setState(() {
+        courses = updatedCourses;
+      });
+    }
+  }
+
+  Future<void> _syncCoursesWithFirestore() async {
+    try {
       final fetchedCourses = await FirebaseCourseService.getCoursesByTopicAndLevel(
         widget.topicId,
         widget.levelId,
       );
 
-      final localizedTitle = await FirebaseCourseService.getLocalizedTopicTitle(
-        widget.topicId,
-        lang,
-      );
+      final firestoreCourses = {
+        for (var map in fetchedCourses) map['id']: Course.fromMap(map['id'], map),
+      };
 
-      setState(() {
-        topicTitle = localizedTitle;
-        courses = fetchedCourses.map((map) => Course.fromMap(map['id'], map)).toList();
-        isLoading = false;
-      });
+      final localIds = _coursesBox.keys.cast<String>().toSet();
+
+      for (final id in firestoreCourses.keys) {
+        final firestoreCourse = firestoreCourses[id]!;
+        if (localIds.contains(id)) {
+          final localCourse = _coursesBox.get(id);
+          if (localCourse == null ||
+              localCourse.titlesJson != firestoreCourse.titlesJson ||
+              localCourse.descriptionsJson != firestoreCourse.descriptionsJson) {
+            await _coursesBox.put(id, firestoreCourse);
+          }
+          localIds.remove(id);
+        } else {
+          await _coursesBox.put(id, firestoreCourse);
+        }
+      }
+
+      for (final idToRemove in localIds) {
+        await _coursesBox.delete(idToRemove);
+      }
     } catch (e) {
-      debugPrint('Ошибка загрузки курсов или темы: $e');
-      setState(() => isLoading = false);
+      debugPrint('Ошибка синхронизации курсов: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _coursesBox.close();
+    super.dispose();
   }
 
   @override

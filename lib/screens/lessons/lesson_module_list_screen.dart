@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'lesson_screen.dart';
 import '../../services/lesson_progress_service.dart';
@@ -67,79 +68,93 @@ class _LessonModuleListScreenState extends State<LessonModuleListScreen> {
   Widget build(BuildContext context) {
     final lang = TranslationService.currentLang;
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(TranslationService.t('lessons')),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              itemCount: lessons.length,
-              itemBuilder: (context, index) {
-                final lesson = lessons[index];
-                final lessonId = lesson.id;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(TranslationService.t('lessons')),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: colorScheme.onBackground),
+          systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        ),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                itemCount: lessons.length,
+                itemBuilder: (context, index) {
+                  final lesson = lessons[index];
+                  final lessonId = lesson.id;
 
-                final lessonMap = lesson.data() as Map<String, dynamic>;
-                final title = lessonMap['title_$lang'] ??
-                    lessonMap['title'] ??
-                    lessonMap['title_en'] ??
-                    lessonMap['title_ru'] ??
-                    '${TranslationService.t('lesson')} ${index + 1}';
+                  final lessonMap = lesson.data() as Map<String, dynamic>;
+                  final title = lessonMap['title_$lang'] ??
+                      lessonMap['title'] ??
+                      lessonMap['title_en'] ??
+                      lessonMap['title_ru'] ??
+                      '${TranslationService.t('lesson')} ${index + 1}';
 
-                final isCompleted = completedLessonIds.contains(lessonId);
-                final isUnlocked = index == 0 ||
-                    completedLessonIds.contains(lessons[index - 1].id);
+                  final isCompleted = completedLessonIds.contains(lessonId);
+                  final isUnlocked = index == 0 ||
+                      completedLessonIds.contains(lessons[index - 1].id);
 
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 18),
-                  decoration: BoxDecoration(
-                    color: isUnlocked
-                        ? colorScheme.surface.withOpacity(0.95)
-                        : colorScheme.surfaceVariant,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isUnlocked ? colorScheme.primary : Colors.grey.shade400,
-                      width: 1.2,
-                    ),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                    leading: isUnlocked
-                        ? const Icon(Icons.play_circle_fill, color: Colors.blueAccent, size: 28)
-                        : const Icon(Icons.lock, color: Colors.grey, size: 24),
-                    title: Text(
-                      title,
-                      style: TextStyle(
-                        color: isUnlocked ? colorScheme.onSurface : Colors.grey,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: isUnlocked
+                          ? (isDark
+                              ? const Color(0xFF2D2F3B)
+                              : const Color(0xFFF4F6FC))
+                          : Theme.of(context).disabledColor.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isUnlocked ? colorScheme.primary.withOpacity(0.4) : Colors.grey.shade300,
+                        width: 1,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    trailing: isCompleted
-                        ? const Icon(Icons.check_circle, color: Colors.green, size: 22)
-                        : null,
-                    onTap: isUnlocked
-                        ? () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => LessonScreen(
-                                  courseId: widget.courseId,
-                                  sectionId: widget.sectionId,
-                                  lessonId: lessonId,
-                                  userId: widget.userId,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      leading: isUnlocked
+                          ? const Icon(Icons.play_circle_fill, color: Colors.blueAccent, size: 28)
+                          : const Icon(Icons.lock, color: Colors.grey, size: 24),
+                      title: Text(
+                        title,
+                        style: TextStyle(
+                          color: isUnlocked ? colorScheme.onSurface : Colors.grey,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      trailing: isCompleted
+                          ? const Icon(Icons.check_circle, color: Colors.green, size: 22)
+                          : null,
+                      onTap: isUnlocked
+                          ? () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => LessonScreen(
+                                    courseId: widget.courseId,
+                                    sectionId: widget.sectionId,
+                                    lessonId: lessonId,
+                                    userId: widget.userId,
+                                  ),
                                 ),
-                              ),
-                            ).then((_) => _loadLessons())
-                        : null,
-                  ),
-                );
-              },
-            ),
+                              ).then((_) => _loadLessons())
+                          : null,
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 }

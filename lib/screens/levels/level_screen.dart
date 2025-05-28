@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/topic_model.dart';
-import '../../models/level_model.dart';
 import '../../services/firebase_services/firebase_level_service.dart';
 import '../courses/course_list_screen.dart';
 import '../../services/translation_service.dart';
+import '../../models/level_model.dart';
 
 class LevelScreen extends StatefulWidget {
   final AppTopic topic;

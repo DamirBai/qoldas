@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Для AnnotatedRegion и SystemUiOverlayStyle
 import '../../models/topic_model.dart';
 import '../../widgets/topic_card.dart';
 import '../levels/level_screen.dart';
@@ -30,93 +31,99 @@ class _HomeScreenState extends State<HomeScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark
-          ? colorScheme.surfaceVariant.withOpacity(0.2)
-          : colorScheme.surfaceVariant.withOpacity(0.05),
-      appBar: AppBar(
-        title: Text(
-          TranslationService.t('learning_topics'),
-          style: TextStyle(color: colorScheme.onBackground),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: isDark
+            ? colorScheme.surfaceVariant.withOpacity(0.2)
+            : colorScheme.surfaceVariant.withOpacity(0.05),
+        appBar: AppBar(
+          title: Text(
+            TranslationService.t('learning_topics'),
+            style: TextStyle(color: colorScheme.onBackground),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: colorScheme.onBackground),
+          systemOverlayStyle: isDark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark,
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
-      ),
-      body: Column(
-        children: [
-          if (widget.isAdmin)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AdminCoursesScreen()),
-                  );
-                },
-                icon: const Icon(Icons.edit),
-                label: Text(TranslationService.t('manage_courses')),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primaryContainer,
-                  foregroundColor: colorScheme.onPrimaryContainer,
-                  minimumSize: const Size.fromHeight(50),
-                ),
-              ),
-            ),
-          Expanded(
-            child: FutureBuilder<List<AppTopic>>(
-              future: _futureTopics,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final topics = snapshot.data ?? [];
-
-                if (topics.isEmpty) {
-                  return Center(
-                    child: Text(
-                      TranslationService.t('no_topics_available'),
-                      style: TextStyle(
-                        color: colorScheme.onBackground,
-                        fontSize: 16,
-                      ),
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: topics.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemBuilder: (context, index) {
-                    final topic = topics[index];
-                    return TopicCard(
-                      topic: topic,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => LevelScreen(
-                              topic: topic,
-                              userId: widget.userId,
-                              isAdmin: widget.isAdmin,
-                            ),
-                          ),
-                        );
-                      },
+        body: Column(
+          children: [
+            if (widget.isAdmin)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AdminCoursesScreen()),
                     );
                   },
-                );
-              },
+                  icon: const Icon(Icons.edit),
+                  label: Text(TranslationService.t('manage_courses')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primaryContainer,
+                    foregroundColor: colorScheme.onPrimaryContainer,
+                    minimumSize: const Size.fromHeight(50),
+                  ),
+                ),
+              ),
+            Expanded(
+              child: FutureBuilder<List<AppTopic>>(
+                future: _futureTopics,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final topics = snapshot.data ?? [];
+
+                  if (topics.isEmpty) {
+                    return Center(
+                      child: Text(
+                        TranslationService.t('no_topics_available'),
+                        style: TextStyle(
+                          color: colorScheme.onBackground,
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: topics.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemBuilder: (context, index) {
+                      final topic = topics[index];
+                      return TopicCard(
+                        topic: topic,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LevelScreen(
+                                topic: topic,
+                                userId: widget.userId,
+                                isAdmin: widget.isAdmin,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

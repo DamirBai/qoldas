@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive_flutter/hive_flutter.dart'; // Импорт Hive Flutter
 import '../../models/course_model.dart';
 import '../../models/topic_model.dart';
 import '../../models/level_model.dart';
@@ -37,10 +39,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
   List<AppLevel> levels = [];
   bool isLoading = true;
 
+  late Box<Course> _coursesBox;
+
   @override
   void initState() {
     super.initState();
-    _loadAllData();
     _scrollController.addListener(() {
       final scrolled = _scrollController.offset > 5;
       if (scrolled != showShadow) {
@@ -49,23 +52,75 @@ class _CoursesScreenState extends State<CoursesScreen> {
         });
       }
     });
+
+    _initAndLoadData();
   }
 
-  Future<void> _loadAllData() async {
-    try {
-      final courseSnap = await FirebaseFirestore.instance.collection('courses').get();
-      final topicSnap = await FirebaseTopicService.getAllTopics();
-      final levelSnap = await FirebaseLevelService.getAllLevels();
+  Future<void> _initAndLoadData() async {
+    // Инициализация Hive (если не инициализирован)
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(CourseAdapter()); // Зарегистрируй адаптер Course
+    }
+    await Hive.initFlutter();
 
-      setState(() {
-        allCourses = courseSnap.docs.map((doc) => Course.fromMap(doc.id, doc.data())).toList();
-        topics = topicSnap;
-        levels = levelSnap;
-        isLoading = false;
-      });
+    _coursesBox = await Hive.openBox<Course>('coursesBox');
+
+    // Загрузка тем и уровней с Firestore
+    final topicSnap = await FirebaseTopicService.getAllTopics();
+    final levelSnap = await FirebaseLevelService.getAllLevels();
+
+    // Загрузка кэшированных курсов
+    final cachedCourses = _coursesBox.values.toList();
+
+    setState(() {
+      allCourses = cachedCourses;
+      topics = topicSnap;
+      levels = levelSnap;
+      isLoading = false; // Убираем индикатор
+    });
+
+    // Асинхронная синхронизация с Firestore
+    _syncCoursesWithFirestore().then((_) {
+      final updatedCourses = _coursesBox.values.toList();
+      if (!listEquals(allCourses, updatedCourses)) {
+        setState(() {
+          allCourses = updatedCourses;
+        });
+      }
+    });
+  }
+
+  Future<void> _syncCoursesWithFirestore() async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance.collection('courses').get();
+
+      final firestoreCourses = {
+        for (var doc in querySnapshot.docs)
+          doc.id: Course.fromMap(doc.id, doc.data()),
+      };
+
+      final localIds = _coursesBox.keys.cast<String>().toSet();
+
+      for (final id in firestoreCourses.keys) {
+        final firestoreCourse = firestoreCourses[id]!;
+        if (localIds.contains(id)) {
+          final localCourse = _coursesBox.get(id);
+          if (localCourse == null ||
+              localCourse.titlesJson != firestoreCourse.titlesJson ||
+              localCourse.descriptionsJson != firestoreCourse.descriptionsJson) {
+            await _coursesBox.put(id, firestoreCourse);
+          }
+          localIds.remove(id);
+        } else {
+          await _coursesBox.put(id, firestoreCourse);
+        }
+      }
+
+      for (final idToRemove in localIds) {
+        await _coursesBox.delete(idToRemove);
+      }
     } catch (e) {
-      debugPrint('Ошибка загрузки данных: $e');
-      setState(() => isLoading = false);
+      debugPrint('Ошибка синхронизации курсов: $e');
     }
   }
 
@@ -73,6 +128,13 @@ class _CoursesScreenState extends State<CoursesScreen> {
     final updated = Map<String, String>.from(filters.value);
     updated[key] = value;
     filters.value = updated;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _coursesBox.close();
+    super.dispose();
   }
 
   @override
@@ -90,6 +152,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
+                  // Поисковая строка
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                     child: Container(
@@ -120,6 +183,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     ),
                   ),
 
+                  // Фильтр по темам
                   ValueListenableBuilder<Map<String, String>>(
                     valueListenable: filters,
                     builder: (context, value, _) => SizedBox(
@@ -147,6 +211,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
                   const SizedBox(height: 8),
 
+                  // Фильтр по уровням
                   ValueListenableBuilder<Map<String, String>>(
                     valueListenable: filters,
                     builder: (context, value, _) => SizedBox(
@@ -174,6 +239,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
                   const SizedBox(height: 12),
 
+                  // Тень под AppBar (скролл)
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     height: showShadow ? 8 : 0,
@@ -188,6 +254,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     ),
                   ),
 
+                  // Список курсов
                   Expanded(
                     child: ValueListenableBuilder<Map<String, String>>(
                       valueListenable: filters,
@@ -224,7 +291,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                               child: CourseCard(
                                 course: course,
                                 userId: widget.userId,
-                                isAdmin: false,
+                                isAdmin: widget.isAdmin,
                               ),
                             );
                           },

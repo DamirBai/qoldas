@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../services/translation_service.dart';
+import 'email_verification_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../layout/main_layout.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -49,9 +50,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       final user = userCredential.user;
       if (user != null) {
+        await user.sendEmailVerification();
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => MainLayout(userId: user.uid)),
+          MaterialPageRoute(
+            builder: (_) => EmailVerificationScreen(userId: user.uid),
+          ),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -80,77 +85,88 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<bool> _onWillPop() async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(TranslationService.t('register')),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _usernameController,
-                decoration: _glassInputDecoration(TranslationService.t('username')),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? TranslationService.t('enter_username') : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: _glassInputDecoration(TranslationService.t('first_name')),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? TranslationService.t('enter_first_name') : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: _glassInputDecoration(TranslationService.t('last_name')),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? TranslationService.t('enter_last_name') : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: _glassInputDecoration(TranslationService.t('email')),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? TranslationService.t('enter_email') : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: _glassInputDecoration(TranslationService.t('password')),
-                validator: (value) => (value == null || value.length < 6)
-                    ? TranslationService.t('weak_password')
-                    : null,
-              ),
-              const SizedBox(height: 24),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _register,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(TranslationService.t('register')),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: colorScheme.onBackground),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: _glassInputDecoration(TranslationService.t('username')),
+                  validator: (value) =>
+                      (value == null || value.isEmpty) ? TranslationService.t('enter_username') : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _firstNameController,
+                  decoration: _glassInputDecoration(TranslationService.t('first_name')),
+                  validator: (value) =>
+                      (value == null || value.isEmpty) ? TranslationService.t('enter_first_name') : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _lastNameController,
+                  decoration: _glassInputDecoration(TranslationService.t('last_name')),
+                  validator: (value) =>
+                      (value == null || value.isEmpty) ? TranslationService.t('enter_last_name') : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: _glassInputDecoration(TranslationService.t('email')),
+                  validator: (value) =>
+                      (value == null || value.isEmpty) ? TranslationService.t('enter_email') : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: _glassInputDecoration(TranslationService.t('password')),
+                  validator: (value) => (value == null || value.length < 6)
+                      ? TranslationService.t('weak_password')
+                      : null,
+                ),
+                const SizedBox(height: 24),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _register,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
+                          child: Text(TranslationService.t('register')),
                         ),
-                        child: Text(TranslationService.t('register')),
                       ),
-                    ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

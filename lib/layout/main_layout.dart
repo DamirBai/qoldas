@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Для AnnotatedRegion и SystemUiOverlayStyle
 import '../../screens/home/home_screen.dart';
 import '../../screens/courses/courses_screen.dart';
 import '../../screens/plans/plans_screen.dart';
@@ -50,51 +51,56 @@ class _MainLayoutState extends State<MainLayout> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      body: screens[_currentIndex],
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: isDark
-              ? const Color(0xFF6F7BD9).withOpacity(0.2)
-              : const Color(0xFFB0C7FF).withOpacity(0.2),
-          highlightColor: Colors.transparent,
-          hoverColor: Colors.transparent,
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (i) => setState(() => _currentIndex = i),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          selectedFontSize: 13,
-          unselectedFontSize: 12,
-          showUnselectedLabels: true,
-          selectedItemColor:
-              isDark ? const Color(0xFFB4BBFF) : const Color(0xFF3F51B5),
-          unselectedItemColor:
-              isDark ? Colors.white70 : Colors.black45,
-          elevation: 12,
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined, size: 24),
-              activeIcon: const Icon(Icons.home, size: 26),
-              label: TranslationService.t('home'),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.school_outlined, size: 24),
-              activeIcon: const Icon(Icons.school, size: 26),
-              label: TranslationService.t('courses'),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.star_outline, size: 24),
-              activeIcon: const Icon(Icons.star, size: 26),
-              label: TranslationService.t('plans'),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline, size: 24),
-              activeIcon: const Icon(Icons.person, size: 26),
-              label: TranslationService.t('profile'),
-            ),
-          ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        body: screens[_currentIndex],
+        bottomNavigationBar: Theme(
+          data: Theme.of(context).copyWith(
+            splashColor: isDark
+                ? const Color(0xFF6F7BD9).withOpacity(0.2)
+                : const Color(0xFFB0C7FF).withOpacity(0.2),
+            highlightColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+          ),
+          child: BottomNavigationBar(
+  currentIndex: _currentIndex,
+  onTap: (i) => setState(() => _currentIndex = i),
+  type: BottomNavigationBarType.fixed,
+  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+  selectedFontSize: 13,
+  unselectedFontSize: 12,
+  showSelectedLabels: true,
+  showUnselectedLabels: false,
+  selectedItemColor:
+      isDark ? const Color(0xFFB4BBFF) : const Color(0xFF3F51B5),
+  unselectedItemColor:
+      isDark ? Colors.white70 : Colors.black45,
+  elevation: 12,
+  items: [
+    BottomNavigationBarItem(
+      icon: const Icon(Icons.dashboard_outlined, size: 24),
+      activeIcon: const Icon(Icons.dashboard, size: 26),
+      label: TranslationService.t('home'),
+    ),
+    BottomNavigationBarItem(
+      icon: const Icon(Icons.menu_book_outlined, size: 24),
+      activeIcon: const Icon(Icons.menu_book, size: 26),
+      label: TranslationService.t('courses'),
+    ),
+    BottomNavigationBarItem(
+      icon: const Icon(Icons.workspace_premium_outlined, size: 24),
+      activeIcon: const Icon(Icons.workspace_premium, size: 26),
+      label: TranslationService.t('plans'),
+    ),
+    BottomNavigationBarItem(
+      icon: const Icon(Icons.account_circle_outlined, size: 24),
+      activeIcon: const Icon(Icons.account_circle, size: 26),
+      label: TranslationService.t('profile'),
+    ),
+  ],
+)
+
         ),
       ),
     );

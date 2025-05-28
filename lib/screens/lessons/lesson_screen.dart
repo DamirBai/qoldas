@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Для AnnotatedRegion и SystemUiOverlayStyle
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../widgets/lesson_video_player.dart';
@@ -148,22 +149,43 @@ class _LessonScreenState extends State<LessonScreen> {
   Widget build(BuildContext context) {
     final lang = TranslationService.currentLang ?? 'en';
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (!isUnlocked) {
       return Scaffold(
-        appBar: AppBar(title: Text(TranslationService.t('lesson'))),
-        body: Center(child: Text(TranslationService.t('complete_previous_lesson'))),
+        appBar: AppBar(
+          title: Text(TranslationService.t('lesson')),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle:
+              isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+          iconTheme: IconThemeData(color: colorScheme.onBackground),
+        ),
+        body: Center(
+          child: Text(TranslationService.t('complete_previous_lesson')),
+        ),
       );
     }
 
     if (lessonData == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(TranslationService.t('lesson'))),
-        body: Center(child: Text(TranslationService.t('no_content'))),
+        appBar: AppBar(
+          title: Text(TranslationService.t('lesson')),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle:
+              isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+          iconTheme: IconThemeData(color: colorScheme.onBackground),
+        ),
+        body: Center(
+          child: Text(TranslationService.t('no_content')),
+        ),
       );
     }
 
@@ -173,125 +195,141 @@ class _LessonScreenState extends State<LessonScreen> {
         lessonData?['title_kk'] ??
         '';
 
-    return Scaffold(
-      appBar: AppBar(title: Text(title.isNotEmpty ? title : TranslationService.t('lesson'))),
-      body: Column(
-        children: [
-          if (steps.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: LinearProgressIndicator(
-                value: (watchedSteps.where((e) => e).length) / steps.length,
-                minHeight: 6,
-                color: colorScheme.primary,
-                backgroundColor: Colors.grey.shade300,
-              ),
-            ),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: currentStep > 0
-                      ? () => setState(() {
-                            currentStep--;
-                            watchedSteps[currentStep] = true;
-                            _pageController.jumpToPage(currentStep);
-                          })
-                      : null,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title.isNotEmpty ? title : TranslationService.t('lesson')),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle:
+              isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+          iconTheme: IconThemeData(color: colorScheme.onBackground),
+        ),
+        body: Column(
+          children: [
+            if (steps.isNotEmpty)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: LinearProgressIndicator(
+                  value: (watchedSteps.where((e) => e).length) / steps.length,
+                  minHeight: 6,
+                  color: colorScheme.primary,
+                  backgroundColor: Colors.grey.shade300,
                 ),
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (index) => setState(() {
-                      currentStep = index;
-                      watchedSteps[index] = true;
-                    }),
-                    itemCount: steps.length,
-                    itemBuilder: (context, index) {
-                      final step = steps[index];
-                      final video = step['videoUrl'] ?? '';
-                      final desc = step['description_$lang'] ??
-                          step['description_en'] ??
-                          step['description_ru'] ??
-                          step['description_kk'] ??
-                          '';
-
-                      return SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            if (video.isNotEmpty)
-                              AspectRatio(
-                                aspectRatio: 9 / 16,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: LessonVideoPlayer(videoUrl: video),
-                                ),
-                              ),
-                            const SizedBox(height: 12),
-                            Text(
-                              '${TranslationService.t('step')} ${index + 1} / ${steps.length}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(desc, style: const TextStyle(fontSize: 18)),
-                          ],
-                        ),
-                      );
-                    },
+              ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: currentStep > 0
+                        ? () => setState(() {
+                              currentStep--;
+                              watchedSteps[currentStep] = true;
+                              _pageController.jumpToPage(currentStep);
+                            })
+                        : null,
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  onPressed: currentStep < steps.length - 1
-                      ? () => setState(() {
-                            currentStep++;
-                            watchedSteps[currentStep] = true;
-                            _pageController.jumpToPage(currentStep);
-                          })
-                      : null,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (index) => setState(() {
+                        currentStep = index;
+                        watchedSteps[index] = true;
+                      }),
+                      itemCount: steps.length,
+                      itemBuilder: (context, index) {
+                        final step = steps[index];
+                        final video = step['videoUrl'] ?? '';
+                        final desc = step['description_$lang'] ??
+                            step['description_en'] ??
+                            step['description_ru'] ??
+                            step['description_kk'] ??
+                            '';
+
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              if (video.isNotEmpty)
+                                AspectRatio(
+                                  aspectRatio: 9 / 16,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: LessonVideoPlayer(videoUrl: video),
+                                  ),
+                                ),
+                              const SizedBox(height: 12),
+                              Text(
+                                '${TranslationService.t('step')} ${index + 1} / ${steps.length}',
+                                style:
+                                    const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(desc, style: const TextStyle(fontSize: 18)),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios),
+                    onPressed: currentStep < steps.length - 1
+                        ? () => setState(() {
+                              currentStep++;
+                              watchedSteps[currentStep] = true;
+                              _pageController.jumpToPage(currentStep);
+                            })
+                        : null,
+                  ),
+                ],
               ),
-              onPressed: (!isLessonCompleted && !watchedSteps.contains(false))
-                  ? _completeLesson
-                  : null,
-              child: Text(
-                isLessonCompleted
-                    ? TranslationService.t('completed')
-                    : TranslationService.t('mark_as_completed'),
-              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          if (hasTest && isLessonCompleted)
+            const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ElevatedButton.icon(
+              child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: _goToTest,
-                icon: const Icon(Icons.quiz_outlined),
-                label: Text(TranslationService.t('start_test')),
+                onPressed:
+                    (!isLessonCompleted && !watchedSteps.contains(false))
+                        ? _completeLesson
+                        : null,
+                child: Text(
+                  isLessonCompleted
+                      ? TranslationService.t('completed')
+                      : TranslationService.t('mark_as_completed'),
+                ),
               ),
             ),
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 10),
+            if (hasTest && isLessonCompleted)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: _goToTest,
+                  icon: const Icon(Icons.quiz_outlined),
+                  label: Text(TranslationService.t('start_test')),
+                ),
+              ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

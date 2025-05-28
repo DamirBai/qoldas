@@ -5,6 +5,7 @@ import '../../services/translation_service.dart';
 import '../../services/lesson_progress_service.dart';
 import 'package:flutter/services.dart';
 import '../../widgets/lesson_video_player.dart';
+import 'lesson_module_list_screen.dart';
 
 class LessonTestScreen extends StatefulWidget {
   final String courseId;
@@ -177,11 +178,36 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(emoji, style: const TextStyle(fontSize: 48)),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Opacity(
+                        opacity: 0.3,
+                        child: Image.asset(
+                          emoji == '🎉'
+                              ? 'assets/gifs/success.gif'
+                              : emoji == '👍'
+                                  ? 'assets/gifs/ok.gif'
+                                  : 'assets/gifs/fail.gif',
+                          width: 140,
+                          height: 140,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      Text(
+                        emoji,
+                        style: const TextStyle(fontSize: 56),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     '${TranslationService.t('correct')}: $correctCount / ${allQuestions.length}',
-                    style: const TextStyle(fontSize: 18),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -189,7 +215,7 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -202,20 +228,20 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
                       Navigator.of(context).pop();
                     });
                   },
-                  child: Text(TranslationService.t('ok')),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    TranslationService.t('ok'),
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
                 ),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildQuestionWithKey() {
-    return KeyedSubtree(
-      key: ValueKey(currentIndex),
-      child: _buildQuestion(),
     );
   }
 
@@ -226,6 +252,7 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
     final answers = List<String>.from(answersMap[lang] ?? answersMap['en'] ?? []);
     final title = q['title_$lang'] ?? q['title'];
     final videoUrl = q['questionUrl'];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -253,24 +280,55 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
           final isCorrect = i == q['rightAnswerIndex'];
           final isSelected = selectedOption == i;
 
-          Color? color;
+          Color? bgColor;
+          Color borderColor;
+          Color textColor;
+
           if (answered && isSelected) {
-            color = isCorrect ? Colors.green : Colors.red;
+            bgColor = isCorrect
+                ? (isDark ? Colors.green.withOpacity(0.3) : Colors.green.withOpacity(0.15))
+                : (isDark ? Colors.red.withOpacity(0.3) : Colors.red.withOpacity(0.15));
+            borderColor = isCorrect ? Colors.green : Colors.red;
+            textColor = isCorrect ? Colors.green.shade900 : Colors.red.shade900;
           } else if (answered && isCorrect) {
-            color = Colors.green;
+            bgColor = isDark ? Colors.green.withOpacity(0.15) : Colors.green.withOpacity(0.10);
+            borderColor = Colors.green;
+            textColor = isDark ? Colors.green.shade700 : Colors.green.shade800;
+          } else {
+            bgColor = isDark ? Colors.white.withOpacity(0.02) : Colors.grey.shade100;
+            borderColor = Colors.grey.withOpacity(0.3);
+            textColor = isDark ? Colors.white : Colors.black87;
           }
 
-          return Card(
-            color: color,
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor, width: 1),
+              boxShadow: answered && isSelected
+                  ? [
+                      BoxShadow(
+                        color: borderColor.withOpacity(0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      )
+                    ]
+                  : null,
+            ),
             child: ListTile(
               title: Text(
                 answers[i],
                 style: TextStyle(
-                  color: color != null ? Colors.white : null,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
                 ),
               ),
               onTap: answered ? null : () => _submit(i),
+              splashColor: answered && isSelected
+                  ? (isCorrect ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2))
+                  : null,
             ),
           );
         }),
@@ -284,23 +342,46 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: LinearProgressIndicator(
-          value: selectedAnswers.length / (allQuestions.length + retried.length),
-          minHeight: 4,
-          backgroundColor: Colors.grey[300],
-          color: Theme.of(context).colorScheme.primary,
+    final progress = selectedAnswers.length / (allQuestions.length + retried.length);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: Theme.of(context).brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        appBar: AppBar(
+          title: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: progress),
+            duration: const Duration(milliseconds: 300),
+            builder: (context, value, _) => LinearProgressIndicator(
+              value: value,
+              minHeight: 4,
+              backgroundColor: Colors.grey[300],
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark,
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+          child: _buildQuestionWithKey(),
         ),
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
-        transitionBuilder: (child, animation) => FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
-        child: _buildQuestionWithKey(),
-      ),
+    );
+  }
+
+  Widget _buildQuestionWithKey() {
+    return KeyedSubtree(
+      key: ValueKey(currentIndex),
+      child: _buildQuestion(),
     );
   }
 }
