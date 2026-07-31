@@ -77,17 +77,6 @@
 
 ---
 
-## 🚀 Установка и запуск
-
-```bash
-git clone https://github.com/твоя-ссылка/qoldas.git
-cd qoldas
-flutter pub get
-flutter run
-```
-
-> Убедись, что установлены Firebase CLI и Android/iOS SDK.
-
 ---
 
 ## 👨‍💻 Авторы
